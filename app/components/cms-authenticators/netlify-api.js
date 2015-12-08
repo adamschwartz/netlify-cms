@@ -9,6 +9,11 @@ export default Base.extend({
 
   authenticate: function() {
     var url = this.get("config.backend.url") || defaultURL;
+
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'http://' + url;
+    }
+
     return new Ember.RSVP.Promise((resolve, reject) => {
       Ember.$.ajax({
         method: "POST",
