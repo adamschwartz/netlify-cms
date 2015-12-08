@@ -313,6 +313,20 @@ export default Ember.Component.extend(Shortcuts, {
       var $ = this.$;
       setTimeout(function() { $(".cms-markdown-link-url")[0].focus(); }, 0);
     },
+    insertApp: function() {
+      var selection = this._getSelection(),
+          value     = this.get("value") || "",
+          before    = value.substr(0, selection.start),
+          after     = value.substr(selection.end);
+
+      // TODO
+      var appSnippet = "{{ SoundCloud Fasdf12fad }}";
+
+      this.set("value", before + appSnippet + after);
+      selection.start = selection.end = selection.start + appSnippet.length;
+      this._setSelection(selection);
+      this._currentSelection = null;
+    },
     insertLink: function() {
       if (this._currentSelection == null || this.get("showLinkbox") === false) { return; }
       var selection = this._currentSelection,

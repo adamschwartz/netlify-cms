@@ -158,7 +158,7 @@ body.ember-application {
     position: relative;
   }
 
-  .cms-link.cms-save-btn, .cms-link.cms-settings-btn, .cms-action.cms-btn-delete {
+  .cms-link.cms-save-btn, .cms-link.cms-settings-btn, .cms-action.cms-btn-delete, .cms-link.cms-insert-app-snippet-btn {
     margin-top: -$container-padding/2;
     border: 1px solid $color-highlight;
     padding: 3px $container-padding;
@@ -170,6 +170,10 @@ body.ember-application {
       position: relative;
       top: 2px;
       margin: 0 $container-padding/2 0 (-$container-padding/2);
+
+      &.cms-icon-add {
+        top: -1px;
+      }
     }
   }
 
