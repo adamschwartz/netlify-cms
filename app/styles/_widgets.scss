@@ -184,8 +184,8 @@ body.ember-application {
 
   .cms-markdown-toolbar {
     position: absolute;
-    transform: scale(0);
-    transition: transform 0.1s ease-in-out;
+    opacity: 0;
+    pointer-events: none;
     border-radius: 5px;
     background: $color-dark;
     color: #fff;
@@ -215,6 +215,7 @@ body.ember-application {
     font-weight: normal;
   }
   .cms-markdown-toolbar.cms-open {
-    transform: scale(1);
+    opacity: 1;
+    pointer-events: all;
   }
 }
