@@ -34,6 +34,41 @@ export default Ember.Component.extend(Shortcuts, {
     this._undoing = false;
     this._selection = null;
     this._checkpoint = this.get("value");
+
+    this.setupTextareaHasBeenFocused();
+
+    this.eagerCMSDomain = 'http://localhost:9016'; // TODO
+    this.setupAppSnippetManager();
+  },
+  textareaHasBeenFocused: false,
+  setupTextareaHasBeenFocused: function() {
+    var that = this;
+    setTimeout(function(){
+      var handler = function() {
+        that.textareaHasBeenFocused = true;
+        that.$("textarea").off("mousedown",handler);
+      };
+      this.$("textarea").on("mousedown",handler);
+    }, 0);
+  },
+  setupAppSnippetManager: function() {
+    var that = this;
+    if (!window.EagerCMSIntegration) {
+      setTimeout(function(){
+        that.setupAppSnippetManager();
+      }, 500);
+      return;
+    }
+    this._appSnippetManager = new EagerCMSIntegration.AppSnippetManager();
+    this._appSnippetManager.initInput(this.$("textarea")[0], {
+      theme: 'netlify'
+    });
+  },
+  isEditingAppSnippet: function() {
+    if (this._appSnippetManager && this._appSnippetManager.isEditing()) {
+      return true;
+    }
+    return false;
   },
   cleanupPaste: function(html) {
     return new Sanitizer().sanitize(html);
@@ -237,17 +272,22 @@ export default Ember.Component.extend(Shortcuts, {
       }
     );
 
-    this.$("textarea").on("blur focus keydown keyup mousedown mouseup",
+    this.$("textarea").on("mousedown",
+      (e) => {
+        this.set("toolbarOpen", false);
+      }
+    );
+
+    this.$("textarea").on("blur focus keydown keyup mouseup",
       (e) => {
         setTimeout(() => {
           var el = e.originalEvent.target;
           if (!(this.get('isDestroyed') || this.get('isDestroying'))) {
-            this.set("toolbarOpen", window.document.activeElement === el && el.selectionStart !== el.selectionEnd);
+            this.set("toolbarOpen", window.document.activeElement === el && el.selectionStart !== el.selectionEnd && !this.isEditingAppSnippet());
           }
-        }, 0);
+        }, 150);
       }
     );
-
 
     var TextAreaCaretPositoon = new CaretPosition(this.$("textarea")[0]);
     this.$("textarea").on("select",
@@ -259,7 +299,9 @@ export default Ember.Component.extend(Shortcuts, {
             var offset = Ember.$(el).offset();
             this.set("toolbarX", Math.max(60, offset.left + position.left));
             this.set("toolbarY", offset.top + position.top);
-            this.set("toolbarOpen", true);
+            setTimeout(() => {
+              this.set("toolbarOpen", window.document.activeElement === el && el.selectionStart !== el.selectionEnd && !this.isEditingAppSnippet())
+            }, 150);
           }
         });
       }
@@ -314,18 +356,27 @@ export default Ember.Component.extend(Shortcuts, {
       setTimeout(function() { $(".cms-markdown-link-url")[0].focus(); }, 0);
     },
     insertApp: function() {
-      var selection = this._getSelection(),
-          value     = this.get("value") || "",
-          before    = value.substr(0, selection.start),
-          after     = value.substr(selection.end);
+      var selection = this._getSelection();
+      var value = this.get("value") || "";
+      var prefix = "";
+      if (!this.textareaHasBeenFocused) {
+        selection.start = selection.end = value.length;
+        prefix = "\n\n"
+      }
+      var before = value.substr(0, selection.start);
+      var after = value.substr(selection.end);
 
       // TODO
-      var appSnippet = "{{ SoundCloud Fasdf12fad }}";
+      var appSnippet = "{§ SoundCloud Fasdf12fad §}";
 
-      this.set("value", before + appSnippet + after);
-      selection.start = selection.end = selection.start + appSnippet.length;
+      this.set("value", before + prefix + appSnippet + after);
+      selection.start = selection.start + prefix.length;
+      selection.end = selection.start + prefix.length + appSnippet.length;
       this._setSelection(selection);
       this._currentSelection = null;
+      setTimeout(() => {
+        this.set("toolbarOpen", false);
+      }, 100);
     },
     insertLink: function() {
       if (this._currentSelection == null || this.get("showLinkbox") === false) { return; }
