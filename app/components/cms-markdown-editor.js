@@ -59,9 +59,17 @@ export default Ember.Component.extend(Shortcuts, {
       }, 500);
       return;
     }
+
+    var scrollEls = [];
+    var controlPanel = $("body.ember-application .cms-control-pane")[0];
+    if (controlPanel) scrollEls.push(controlPanel);
+    var entryEditor = $(".cms.cms-content.cms-entry-editor")[0];
+    if (entryEditor) scrollEls.push(entryEditor);
+
     this._appSnippetManager = new EagerCMSIntegration.AppSnippetManager();
     this._appSnippetManager.initInput(this.$("textarea")[0], {
-      theme: 'netlify'
+      theme: 'netlify',
+      scrollEls: scrollEls
     });
   },
   isEditingAppSnippet: function() {
