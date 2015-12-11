@@ -297,16 +297,12 @@ export default Ember.Component.extend(Shortcuts, {
       }
     );
 
-    var TextAreaCaretPositoon = new CaretPosition(this.$("textarea")[0]);
     this.$("textarea").on("select",
       (e) => {
         Ember.run(() => {
           if (!(this.get('isDestroyed') || this.get('isDestroying'))) {
             var el = e.originalEvent.target;
-            var position = TextAreaCaretPositoon.get(el.selectionStart, el.selectionEnd);
-            var offset = Ember.$(el).offset();
-            this.set("toolbarX", Math.max(60, offset.left + position.left));
-            this.set("toolbarY", offset.top + position.top);
+            this.positionToolbar();
             setTimeout(() => {
               this.set("toolbarOpen", window.document.activeElement === el && el.selectionStart !== el.selectionEnd && !this.isEditingAppSnippet())
             }, 150);
@@ -314,6 +310,19 @@ export default Ember.Component.extend(Shortcuts, {
         });
       }
     );
+
+    this.TextAreaCaretPositoon = new CaretPosition(this.$("textarea")[0]);
+    $(".cms-control-pane, .cms.cms-content.cms-entry-editor").on("scroll", () => {
+      this.positionToolbar();
+    });
+  },
+
+  positionToolbar: function() {
+    var el = this.$("textarea")[0];
+    var position = this.TextAreaCaretPositoon.get(el.selectionStart, el.selectionEnd);
+    var offset = Ember.$(el).offset();
+    this.set("toolbarX", Math.max(60, offset.left + position.left));
+    this.set("toolbarY", offset.top + position.top);
   },
 
   bookmark: function(before) {
