@@ -311,7 +311,7 @@ export default Ember.Component.extend(Shortcuts, {
       }
     );
 
-    this.TextAreaCaretPositoon = new CaretPosition(this.$("textarea")[0]);
+    this.TextAreaCaretPosition = new CaretPosition(this.$("textarea")[0]);
     $(".cms-control-pane, .cms.cms-content.cms-entry-editor").on("scroll", () => {
       this.positionToolbar();
     });
@@ -319,7 +319,7 @@ export default Ember.Component.extend(Shortcuts, {
 
   positionToolbar: function() {
     var el = this.$("textarea")[0];
-    var position = this.TextAreaCaretPositoon.get(el.selectionStart, el.selectionEnd);
+    var position = this.TextAreaCaretPosition.get(el.selectionStart, el.selectionEnd);
     var offset = Ember.$(el).offset();
     this.set("toolbarX", Math.max(60, offset.left + position.left));
     this.set("toolbarY", offset.top + position.top);
