@@ -108,6 +108,8 @@ class HTMLHandler {
   }
 }
 
+var eagerAppRe = /^([^]*)\{§ ([a-zA-Z0-9\-_]+) ([a-zA-Z0-9\-_]{10,12}) §\}([^]*)$/
+
 /*
   MarkdownProcessor - Converts a Markdown string to a virtual DOM.
 */
@@ -118,7 +120,7 @@ class MarkdownProcessor {
   }
 
   markdownToVDOM(markdown) {
-    var event, entering, node, newNode, html, grandparent;
+    var event, entering, node, newNode, html, grandparent, appMatch;
     var ast = this.markdownParser.parse(markdown || "");
     var walker = ast.walker();
     var stack = [{tagName: "div", properties: {}, children: []}];
@@ -129,7 +131,26 @@ class MarkdownProcessor {
       node = event.node;
       switch(node.type) {
         case 'Text':
-          current.children.push(new VText(node.literal));
+          appMatch = eagerAppRe.exec(node.literal)
+
+          if (appMatch){
+            if (appMatch[1]){
+              current.children.push(new VText(appMatch[1]));
+            }
+
+            current.children.push(new VNode("eager-app", {
+              attributes: {
+                'install-id': appMatch[3],
+                'app-alias': appMatch[2]
+              }
+            }, []));
+
+            if (appMatch[4]){
+              current.children.push(new VText(appMatch[4]));
+            }
+          } else {
+            current.children.push(new VText(node.literal));
+          }
           break;
         case 'Softbreak':
           current.children.push(new VText("\n"));
