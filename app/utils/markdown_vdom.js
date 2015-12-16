@@ -108,7 +108,7 @@ class HTMLHandler {
   }
 }
 
-var eagerAppRe = /^([^]*)\{§ ([a-zA-Z0-9\-_]+) ([a-zA-Z0-9\-_]{10,12}) §\}([^]*)$/
+var eagerAppRe = /^([^]*)\{§ ([a-zA-Z0-9\-_ '’]+) ([a-zA-Z0-9\-_]{10,12}) §\}([^]*)$/
 
 /*
   MarkdownProcessor - Converts a Markdown string to a virtual DOM.
@@ -141,7 +141,7 @@ class MarkdownProcessor {
             current.children.push(new VNode("eager-app", {
               attributes: {
                 'install-id': appMatch[3],
-                'app-alias': appMatch[2]
+                'app-title': appMatch[2]
               }
             }, []));
 
